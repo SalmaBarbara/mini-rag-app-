@@ -18,3 +18,4 @@ $ conda create -n mini-rag-app python=3.8
 ```bash
 $ conda activate -n mini-rag-app 
 ```
+#####
