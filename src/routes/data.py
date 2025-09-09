@@ -1,8 +1,14 @@
 from fastapi import FastAPI ,APIRouter,Depends,UploadFile,status
 from fastapi.responses import JSONResponse
 from helpers.config import get_settings,Settings
-from controllers import DataController
+from controllers import DataController,ProjectController
 from models import ResponseSignal
+import os
+import aiofiles
+import logging
+
+logger =logging.
+
 
 data_router = APIRouter(
     prefix = "/api/v1/data",
@@ -26,8 +32,30 @@ async def upload_file(project_id:str,file:UploadFile,
             }
         )
     
-    return {
-        "signal": result_signal
-    }
+    files_path,file_id=data_controller.generate_unique_filepath(
+         orig_file_name=file.filename,
+         project_id=project_id
+         )
+    try:
+        async with aiofiles.open(files_path,"wb") as f:
+            while chunk := await file.read(app_settings.FILE_DEFAULT_CHUNK_SIZE):
+                await f.write(chunk)
+
+    except Exception as e:
+
+
+            return JSONResponse(
+                status_code =status.HTTP_400_BAD_REQUEST,
+                content={
+                "signal": ResponseSignal.FILE_UPLOAD_FAILED.value,
+            }
+        )
+    
+    return JSONResponse(
+            content={
+                "signal": ResponseSignal.FILE_UPLOAD_SUCCESS.value,
+                "file_id":file_id
+            }
+        )
 
     
